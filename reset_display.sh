@@ -3,9 +3,19 @@
 ######current potential flags
 # remove-config -> removes current config
 # generate -> creates new config file based on display
+# -h / --h / -help / --help -> show current commands
 
 configFile="/u/$USER/.config/reset_display.conf"
 flag=$1 #capture the flag into a script variable rather than leaving as special
+
+if [[ $flag = "-h"]] || [[ $flag = "--h" ]] || [[ $flag = "-help" ]] || [[ $flag = "--help" ]]
+then
+  printf "This script is designed to reset the displays after monitor shutting off or sleeping \n"
+  printf "When run by itself, the script will reset the displays based on a config file located in ${configFile} \n"
+  printf "reset_display remove-config -> will remove the config only \n"
+  printf "reset_display generate -> will only generate the config, should be ran when the monitors are set the way the should be \n"
+  exit 2
+fi
 
 #This is a flag to allow the user to remove the config without admin intervention
 #need to turn this into a try at some point

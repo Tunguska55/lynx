@@ -8,7 +8,7 @@
 configFile="/u/$USER/.config/reset_display.conf"
 flag=$1 #capture the flag into a script variable rather than leaving as special
 
-if [[ $flag = "-h"]] || [[ $flag = "--h" ]] || [[ $flag = "-help" ]] || [[ $flag = "--help" ]]
+if [[ $flag = "-h" || $flag = "--h" || $flag = "-help" || $flag = "--help" ]]
 then
   printf "This script is designed to reset the displays after monitor shutting off or sleeping \n"
   printf "When run by itself, the script will reset the displays based on a config file located in ${configFile} \n"
@@ -50,6 +50,13 @@ EOF
 exit 3
 fi
 
+#this is a quick catch to prevent the script from erroring out with being unable to find a file
+if [[ ! -e $configFile ]]
+then
+  printf "unable to find config file, please run generate with reset_display to create one \n"
+  exit 5
+fi
+
 #array to store values read from conf file
 declare -A disparray
 
@@ -81,6 +88,8 @@ then
   #printf "successfully executing \n" #debugging line
   xrandr --output ${disparray["PRIMARYDISPLAY"]} --auto --pos ${disparray["PRIMARYPOSITION"]} --primary \
   --output ${disparray["SECONDARYDISPLAY"]} --auto --pos ${disparray["SECONDARYPOSITION"]}
+
+  printf "reset completed normally \n"
 fi
 
 
