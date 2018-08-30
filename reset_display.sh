@@ -2,13 +2,13 @@
 configFile="/u/$USER/.config/reset_display.conf"
 
 #This is a flagf to allow the user to remove the config without admin intervention
-if [ $1 == "remove-config"]
+if [[ -z $1 ]] && [[ $1 = "remove-config" ]]
 then
   rm -f $configFile
 fi
 
 #Create a config file based on current settings (don't run when monitor is messed up)
-if [ ! -e $configFile ]
+if [[ ! -e $configFile ]]
 then
   #printf "in the if statement \n" #debug statement
   PrimDisplay=$(xrandr -q | grep -e "\bprimary\b" | awk '{print $1}')
@@ -34,10 +34,10 @@ declare -A disparray
 
 #read the conf file and store value in array
 IFS="="
-printf "Resetting display based config file (${configFile})"
+printf "Resetting display based on config file (${configFile}) \n"
 while read -r key value
 do
-printf "Content of $key is ${value//\"/} \n"
+#printf "Content of $key is ${value//\"/} \n" #for debugging
   case $key in
     "PRIMARYDISPLAY")
       disparray+=(["PRIMARYDISPLAY"]=$value)
@@ -55,8 +55,14 @@ printf "Content of $key is ${value//\"/} \n"
 done < $configFile
 
 #code execution to reset display
+if [[ -e $configFile ]] && [[ ! -z $disparray["PRIMARYDISPLAY"] ]]
+then
+  #printf "successfully executing \n" #debugging line
+  xrandr --output $disparray["PRIMARYDISPLAY"] --auto --pos $disparray["PRIMARYPOSITION"] --primary \
+  --output $disparray["SECONDARYDISPLAY"] --auto --pos $disparray["SECONDARYPOSITION"]
+fi
 
 
 #debugging and logging
-printf "Primary Display = ${disparray['PRIMARYDISPLAY']} \n"
-printf "Secondary Display = ${SecDisplay}\n"
+#printf "Primary Display = ${disparray['PRIMARYDISPLAY']} \n"
+#printf "Secondary Display = ${SecDisplay}\n"
