@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 configFile="/u/$USER/.config/reset_display.conf"
+
+#This is a flagf to allow the user to remove the config without admin intervention
+if [ $1 == "remove-config"]
+then
+  rm -f $configFile
+fi
+
+#Create a config file based on current settings (don't run when monitor is messed up)
 if [ ! -e $configFile ]
 then
   #printf "in the if statement \n" #debug statement
@@ -21,8 +29,10 @@ EOF
 
 fi
 
+#array to store values read from conf file
 declare -A disparray
 
+#read the conf file and store value in array
 IFS="="
 printf "Resetting display based config file (${configFile})"
 while read -r key value
@@ -44,5 +54,9 @@ printf "Content of $key is ${value//\"/} \n"
   esac
 done < $configFile
 
+#code execution to reset display
+
+
+#debugging and logging
 printf "Primary Display = ${disparray['PRIMARYDISPLAY']} \n"
 printf "Secondary Display = ${SecDisplay}\n"
