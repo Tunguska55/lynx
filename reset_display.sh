@@ -1,14 +1,24 @@
 #!/usr/bin/env bash
-configFile="/u/$USER/.config/reset_display.conf"
 
-#This is a flagf to allow the user to remove the config without admin intervention
-if [[ -z $1 ]] && [[ $1 = "remove-config" ]]
+######current potential flags
+# remove-config -> removes current config
+# generate -> creates new config file based on display
+
+configFile="/u/$USER/.config/reset_display.conf"
+flag=$1 #capture the flag into a script variable rather than leaving as special
+
+#This is a flag to allow the user to remove the config without admin intervention
+#need to turn this into a try at some point
+if [[ $flag = "remove-config" ]]
 then
-  rm -f $configFile
+  rm -f ${configFile}
+  printf "config file removed successfully \n"
+  printf "exiting script \n"
+  exit 2
 fi
 
 #Create a config file based on current settings (don't run when monitor is messed up)
-if [[ ! -e $configFile ]]
+if [[ ! -e $configFile ]] && [[ $flag = "generate" ]]
 then
   #printf "in the if statement \n" #debug statement
   PrimDisplay=$(xrandr -q | grep -e "\bprimary\b" | awk '{print $1}')
@@ -27,6 +37,7 @@ PRIMARYPOSITION=$PrimPosition
 SECONDARYPOSITION=$SecPosition
 EOF
 
+exit 3
 fi
 
 #array to store values read from conf file
