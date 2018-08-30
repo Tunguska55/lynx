@@ -58,8 +58,8 @@ done < $configFile
 if [[ -e $configFile ]] && [[ ! -z $disparray["PRIMARYDISPLAY"] ]]
 then
   #printf "successfully executing \n" #debugging line
-  xrandr --output $disparray["PRIMARYDISPLAY"] --auto --pos $disparray["PRIMARYPOSITION"] --primary \
-  --output $disparray["SECONDARYDISPLAY"] --auto --pos $disparray["SECONDARYPOSITION"]
+  xrandr --output ${disparray["PRIMARYDISPLAY"]} --auto --pos ${disparray["PRIMARYPOSITION"]} --primary \
+  --output ${disparray["SECONDARYDISPLAY"]} --auto --pos ${disparray["SECONDARYPOSITION"]}
 fi
 
 
