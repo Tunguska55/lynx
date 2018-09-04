@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+#reach out to jonathanq if you have any issues with this script
+
+#This script resolves the random new chrome window opening every 2 hours
+
+pkill chrome
+rm -rf "/u/$USER/.cache/google-chrome"
