@@ -80,7 +80,7 @@ then
   PrimaryOption=$(xrandr -q | grep -e "\bprimary\b" | grep -v "disconnected" | awk '{print $1}')
   if [[ ! $PrimaryOption = "" ]]
   then
-    PrimDisplay=PrimaryOption
+    PrimDisplay=${PrimaryOption}
     SecDisplay=$(xrandr -q | grep -e "\bconnected\b" | grep -v "primary" | awk '{print $1}')
     PrimPosition=$(xrandr -q | grep -e "\bprimary\b" | awk '{print $4}' | cut -d+ -f2- | sed 's/+/\x/g')
     SecPosition=$(xrandr -q | grep -e "\bconnected\b" | grep -v "primary" | awk '{print $3}'| cut -d+ -f2- | sed 's/+/\x/g')
