@@ -8,6 +8,7 @@
 # generate -> creates new config file based on display
 # -h / --h / -help / --help -> show current commands
 
+
 bold=$(tput bold)
 normal=$(tput sgr0)
 configFile="/u/$USER/.config/reset_display.conf"
@@ -24,6 +25,8 @@ cat <<EOF
   ${bold}remove-config${normal}          : removes custom config
   ${bold}custom$ - broken{normal}         : reset display using the xorg config file located $nvConf
 
+  If running remotely, run the command:
+  ${bold}setenv DISPLAY :0${normal} before running the script
 
   Description:
   This script is designed to reset the displays after a monitor shuts off or sleeps
@@ -55,13 +58,15 @@ then
   printf "Config file removed successfully \n"
   printf "Exiting script \n"
   exit 2
-else
-  printf "Config file not found, either it has been moved or needs to be generated \n"
+elif [[ $flag = "remove-config" ]] && [[ ! -e $configFile ]]
+then
+   printf "Config file not found, either it has been moved or needs to be generated \n"
 fi
 
 #Create a config file based on current settings (don't run when monitor is messed up)
 if [[ ! -e $configFile ]] && [[ $flag = "generate" ]]
 then
+  printf "Creating config file now... \n"
   #printf "in the if statement \n" #debug statement
   PrimDisplay=$(xrandr -q | grep -e "\bprimary\b" | awk '{print $1}')
   SecDisplay=$(xrandr -q | grep -e "\bconnected\b" | grep -v "primary" | awk '{print $1}')
@@ -79,16 +84,22 @@ PRIMARYPOSITION=$PrimPosition
 SECONDARYPOSITION=$SecPosition
 EOF
 
+printf "Done \n"
 exit 3
+elif [[ -e $configFile ]] && [[ $flag = "generate" ]]
+then
+  printf "Config file already exists, if you want to remove it, run remove-config first \n"
 fi
 
 #array to store values read from conf file
 declare -A disparray
 
 IFS="="
-if [[ $flag = "custom" ]] && [[ -e $configFile ]]
+success=0
+
+if [[ $flag =  "" ]] && [[ -e $configFile ]]
 then
-  printf "Resetting display based on config file (${configFile}) \n"
+  printf "Resetting display based on config file (${bold}${configFile}${normal}) \n"
   while read -r key value
   do
   #printf "Content of $key is ${value//\"/} \n" #for debugging
@@ -107,27 +118,31 @@ then
         ;;
     esac
   done < $configFile
-elif [[ -e $nvConf ]] && [[ ! $flag = "custom" ]]
+  success=1
+elif [[ -e $nvConf ]] && [[ $flag = "custom" ]]
 then
   printf "Resetting display based on config file (${nvConf}) \n"
   #unfortunately I can't find the primary monitor flag in the xorg conf file
   #so this will be a broken feature for now
-else
+elif [[ ! -e $configFile ]] && [[ ! -e $nvConf ]]
+then
   printf "Unable to find config file, please run reset_display generate to create one \n"
-  printf "If you want to use the xorg.conf, please run reset_display with no flags \n"
+  success=0
   exit 5
 fi
 
 #code execution to reset display
-if [[ -e $configFile ]] && [[ ! -z $disparray["PRIMARYDISPLAY"] ]]
+if [[ -e $configFile ]] && [[ ! -z $disparray["PRIMARYDISPLAY"] ]] && [[ $success = 1 ]]
 then
   #printf "successfully executing \n" #debugging line
   xrandr --output ${disparray["PRIMARYDISPLAY"]} --auto --pos ${disparray["PRIMARYPOSITION"]} --primary;
   xrandr --output ${disparray["SECONDARYDISPLAY"]} --auto --pos ${disparray["SECONDARYPOSITION"]}
-
   printf "Reset completed normally \n"
-else
+  exit 0
+elif [[ ! -e $configFile ]] && [[ -z $disparray["PRIMARYDISPLAY"] ]] || [[ $success = 0 ]]
+then
   printf "Error during reset \n"
+  printf "Check to see if config file exists in ${bold}$configFile${normal} \n"
 fi
 
 
