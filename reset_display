@@ -20,9 +20,9 @@ cat <<EOF
 
   usage: reset_display [option]
 
-  ${bold}generate${normal}       : generates custom config
-  ${bold}remove-config${normal}   : removes custom config
-  ${bold}custom${normal}         : reset display using the custom config file located $configFile
+  ${bold}generate${normal}                : generates custom config
+  ${bold}remove-config${normal}          : removes custom config
+  ${bold}custom$ - broken{normal}         : reset display using the xorg config file located $nvConf
 
 
   Description:
@@ -40,7 +40,7 @@ cat <<EOF
   If you want to remove the custom config:
   reset_display remove-config
 
-  If you want to use the custom config instead of /etc/xorg.conf:
+  If you want to use the custom nvidia config (feature currently broken):
   reset_dusplay custom
 
 EOF
@@ -111,7 +111,7 @@ elif [[ -e $nvConf ]] && [[ ! $flag = "custom" ]]
 then
   printf "Resetting display based on config file (${nvConf}) \n"
   #unfortunately I can't find the primary monitor flag in the xorg conf file
-  #so this will be a broken feature for now 
+  #so this will be a broken feature for now
 else
   printf "Unable to find config file, please run reset_display generate to create one \n"
   printf "If you want to use the xorg.conf, please run reset_display with no flags \n"
@@ -125,7 +125,9 @@ then
   xrandr --output ${disparray["PRIMARYDISPLAY"]} --auto --pos ${disparray["PRIMARYPOSITION"]} --primary;
   xrandr --output ${disparray["SECONDARYDISPLAY"]} --auto --pos ${disparray["SECONDARYPOSITION"]}
 
-  printf "reset completed normally \n"
+  printf "Reset completed normally \n"
+else
+  printf "Error during reset \n"
 fi
 
 
