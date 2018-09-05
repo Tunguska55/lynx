@@ -49,12 +49,14 @@ fi
 
 #This is a flag to allow the user to remove the config without admin intervention
 #need to turn this into a try at some point
-if [[ $flag = "remove-config" ]]
+if [[ $flag = "remove-config" ]] && [[ -e $configFile ]]
 then
   rm -f ${configFile}
   printf "Config file removed successfully \n"
   printf "Exiting script \n"
   exit 2
+else
+  printf "Config file not found, either it has been moved or needs to be generated \n"
 fi
 
 #Create a config file based on current settings (don't run when monitor is messed up)
@@ -80,37 +82,43 @@ EOF
 exit 3
 fi
 
-#this is a quick catch to prevent the script from erroring out with being unable to find a file
-if [[ ! -e $configFile ]]
-then
-  printf "unable to find config file, please run reset_display generate to create one \n"
-  exit 5
-fi
-
 #array to store values read from conf file
 declare -A disparray
 
 #read the conf file and store value in array
 IFS="="
-printf "Resetting display based on config file (${configFile}) \n"
-while read -r key value
-do
-#printf "Content of $key is ${value//\"/} \n" #for debugging
-  case $key in
-    "PRIMARYDISPLAY")
-      disparray+=(["PRIMARYDISPLAY"]=$value)
-      ;;
-    "SECONDARYDISPLAY")
-      disparray+=(["SECONDARYDISPLAY"]=$value)
-      ;;
-    "PRIMARYPOSITION")
-      disparray+=(["PRIMARYPOSITION"]=$value)
-      ;;
-    "SECONDARYPOSITION")
-      disparray+=(["SECONDARYPOSITION"]=$value)
-      ;;
-  esac
-done < $configFile
+
+
+if [[ $flag = "custom" ]] && [[ -e $configFile ]]
+then
+  printf "Resetting display based on config file (${configFile}) \n"
+  while read -r key value
+  do
+  #printf "Content of $key is ${value//\"/} \n" #for debugging
+    case $key in
+      "PRIMARYDISPLAY")
+        disparray+=(["PRIMARYDISPLAY"]=$value)
+        ;;
+      "SECONDARYDISPLAY")
+        disparray+=(["SECONDARYDISPLAY"]=$value)
+        ;;
+      "PRIMARYPOSITION")
+        disparray+=(["PRIMARYPOSITION"]=$value)
+        ;;
+      "SECONDARYPOSITION")
+        disparray+=(["SECONDARYPOSITION"]=$value)
+        ;;
+    esac
+  done < $configFile
+elif [[ -e $nvConf ]] && [[ ! $flag = "custom" ]]
+then
+
+
+else
+  printf "Unable to find config file, please run reset_display generate to create one \n"
+  printf "If you want to use the xorg.conf, please run reset_display with no flags \n"
+  exit 5
+fi
 
 #code execution to reset display
 if [[ -e $configFile ]] && [[ ! -z $disparray["PRIMARYDISPLAY"] ]]
