@@ -12,8 +12,15 @@
 bold=$(tput bold)
 normal=$(tput sgr0)
 configFile="/u/$USER/.config/reset_display.conf"
-nvConf="/etc/xorg.conf"
+nvConf="/etc/X11/xorg.conf"
 flag=$1 #capture the flag into a script variable rather than leaving as special
+
+#Declaring writeable variables here as they persist through the code
+PrimDisplay=""
+SecDisplay=""
+PrimPosition=""
+SecPosition=""
+PrimaryOption=""
 
 if [[ $flag = "-h" || $flag = "--h" || $flag = "-help" || $flag = "--help" ]]
 then
@@ -68,7 +75,14 @@ if [[ ! -e $configFile ]] && [[ $flag = "generate" ]]
 then
   printf "Creating config file now... \n"
   #printf "in the if statement \n" #debug statement
-  PrimDisplay=$(xrandr -q | grep -e "\bprimary\b" | awk '{print $1}')
+  PrimaryOption=$(xrandr -q | grep -e "\bprimary\b" | grep -v "disconnected" | awk '{print $1}')
+  if [[ ! $PrimaryOption = "" ]]
+  then
+    PrimDisplay=PrimaryOption
+  elif [[ $PrimaryOption = "" ]]
+  then
+    PrimDisplay=$(xrandr -q | grep -e "0+0" | awk '{print $1}')
+  fi
   SecDisplay=$(xrandr -q | grep -e "\bconnected\b" | grep -v "primary" | awk '{print $1}')
   PrimPosition=$(xrandr -q | grep -e "\bprimary\b" | awk '{print $4}' | cut -d+ -f2- | sed 's/+/\x/g')
   SecPosition=$(xrandr -q | grep -e "\bconnected\b" | grep -v "primary" | awk '{print $3}'| cut -d+ -f2- | sed 's/+/\x/g')
@@ -78,6 +92,7 @@ cat <<EOF > $configFile
 #If this file gets corrupted please remove it as the script will recreate it
 #Do not modify!
 #Talk to Jon, Hector or Jack for any questions
+PRIMARYOPTION=$PrimaryOption
 PRIMARYDISPLAY=$PrimDisplay
 SECONDARYDISPLAY=$SecDisplay
 PRIMARYPOSITION=$PrimPosition
@@ -104,6 +119,9 @@ then
   do
   #printf "Content of $key is ${value//\"/} \n" #for debugging
     case $key in
+      "PRIMARYOPTION")
+        disparray+=(["PRIMARYOPTION"]=$value)
+        ;;
       "PRIMARYDISPLAY")
         disparray+=(["PRIMARYDISPLAY"]=$value)
         ;;
@@ -135,10 +153,19 @@ fi
 if [[ -e $configFile ]] && [[ ! -z $disparray["PRIMARYDISPLAY"] ]] && [[ $success = 1 ]]
 then
   #printf "successfully executing \n" #debugging line
-  xrandr --output ${disparray["PRIMARYDISPLAY"]} --auto --pos ${disparray["PRIMARYPOSITION"]} --primary;
-  xrandr --output ${disparray["SECONDARYDISPLAY"]} --auto --pos ${disparray["SECONDARYPOSITION"]}
-  printf "Reset completed normally \n"
-  exit 0
+  if [[ ! ${disparray["PRIMARYOPTION"]} = "" ]]
+  then
+    xrandr --output ${disparray["PRIMARYDISPLAY"]} --auto --pos ${disparray["PRIMARYPOSITION"]} --primary;
+    xrandr --output ${disparray["SECONDARYDISPLAY"]} --auto --pos ${disparray["SECONDARYPOSITION"]}
+    printf "Reset completed normally, primary option found \n"
+    exit 0
+  elif [[ ${disparray["PRIMARYOPTION"]} = "" ]]
+  then
+    xrandr --output ${disparray["PRIMARYDISPLAY"]} --auto --pos ${disparray["PRIMARYPOSITION"]};
+    xrandr --output ${disparray["SECONDARYDISPLAY"]} --auto --pos ${disparray["SECONDARYPOSITION"]}
+    printf "Reset completed normally, no primary option \n"
+    exit 0
+  fi
 elif [[ ! -e $configFile ]] && [[ -z $disparray["PRIMARYDISPLAY"] ]] || [[ $success = 0 ]]
 then
   printf "Error during reset \n"
