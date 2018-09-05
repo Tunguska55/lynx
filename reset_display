@@ -88,8 +88,8 @@ then
     SecRes=$(xrandr -q | grep -e "\bconnected\b" | grep -v "\bprimary\b" | awk '{print $3}' | cut -d+ -f1)
   elif [[ $PrimaryOption = "" ]]
   then
-    PrimDisplay=$(xrandr -q | grep -e "0+0" | awk '{print $1}')
-    SecDisplay=$(xrandr -q | grep -e "\bconnected\b" | grep -v "0+0" | awk '{print $1}')
+    PrimDisplay=$(xrandr -q | grep -e "+0+0" | awk '{print $1}')
+    SecDisplay=$(xrandr -q | grep -e "\bconnected\b" | grep -v "+0+0" | awk '{print $1}')
     PrimPosition=$(xrandr -q | grep -e ${PrimDisplay} | awk '{print $3}' | cut -d+ -f2- | sed 's/+/\x/g')
     SecPosition=$(xrandr -q | grep -e ${SecDisplay} | awk '{print $3}' | cut -d+ -f2- | sed 's/+/\x/g')
     PrimaryRes=$(xrandr -q | grep -e ${PrimDisplay} | awk '{print $3}' | cut -d+ -f1)
