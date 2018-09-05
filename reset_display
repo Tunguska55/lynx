@@ -21,6 +21,8 @@ SecDisplay=""
 PrimPosition=""
 SecPosition=""
 PrimaryOption=""
+PrimaryRes=""
+SecRes=""
 
 if [[ $flag = "-h" || $flag = "--h" || $flag = "-help" || $flag = "--help" ]]
 then
@@ -79,13 +81,21 @@ then
   if [[ ! $PrimaryOption = "" ]]
   then
     PrimDisplay=PrimaryOption
+    SecDisplay=$(xrandr -q | grep -e "\bconnected\b" | grep -v "primary" | awk '{print $1}')
+    PrimPosition=$(xrandr -q | grep -e "\bprimary\b" | awk '{print $4}' | cut -d+ -f2- | sed 's/+/\x/g')
+    SecPosition=$(xrandr -q | grep -e "\bconnected\b" | grep -v "primary" | awk '{print $3}'| cut -d+ -f2- | sed 's/+/\x/g')
+    PrimaryRes=$(xrandr -q | grep -e "\bprimary\b" | awk '{print $4}' | cut -d+ -f1)
+    SecRes=$(xrandr -q | grep -e "\bconnected\b" | grep -v "\bprimary\b" | awk '{print $3}' | cut -d+ -f1)
   elif [[ $PrimaryOption = "" ]]
   then
     PrimDisplay=$(xrandr -q | grep -e "0+0" | awk '{print $1}')
+    SecDisplay=$(xrandr -q | grep -e "\bconnected\b" | grep -v "0+0" | awk '{print $1}')
+    PrimPosition=$(xrandr -q | grep -e ${PrimDisplay} | awk '{print $3}' | cut -d+ -f2- | sed 's/+/\x/g')
+    SecPosition=$(xrandr -q | grep -e ${SecDisplay} | awk '{print $3}' | cut -d+ -f2- | sed 's/+/\x/g')
+    PrimaryRes=$(xrandr -q | grep -e ${PrimDisplay} | awk '{print $3}' | cut -d+ -f1)
+    SecRes=$(xrandr -q | grep -e ${SecDisplay} | awk '{print $3}' | cut -d+ -f1)
   fi
-  SecDisplay=$(xrandr -q | grep -e "\bconnected\b" | grep -v "primary" | awk '{print $1}')
-  PrimPosition=$(xrandr -q | grep -e "\bprimary\b" | awk '{print $4}' | cut -d+ -f2- | sed 's/+/\x/g')
-  SecPosition=$(xrandr -q | grep -e "\bconnected\b" | grep -v "primary" | awk '{print $3}'| cut -d+ -f2- | sed 's/+/\x/g')
+
   #The indentation of EOF from top to bottom is intentional, spacing it would break it
 cat <<EOF > $configFile
 #This file is created for the reset_display script
@@ -97,6 +107,8 @@ PRIMARYDISPLAY=$PrimDisplay
 SECONDARYDISPLAY=$SecDisplay
 PRIMARYPOSITION=$PrimPosition
 SECONDARYPOSITION=$SecPosition
+PRIMARYRESOLUTION=$PrimaryRes
+SECONDARYRESOLUTION=$SecRes
 EOF
 
 printf "Done \n"
@@ -134,6 +146,12 @@ then
       "SECONDARYPOSITION")
         disparray+=(["SECONDARYPOSITION"]=$value)
         ;;
+      "PRIMARYRESOLUTION")
+        disparray+=(["PRIMARYRESOLUTION"]=$value)
+        ;;
+      "SECONDARYRESOLUTION")
+        disparray+=(["SECONDARYRESOLUTION"]=$value)
+        ;;
     esac
   done < $configFile
   success=1
@@ -155,14 +173,14 @@ then
   #printf "successfully executing \n" #debugging line
   if [[ ! ${disparray["PRIMARYOPTION"]} = "" ]]
   then
-    xrandr --output ${disparray["PRIMARYDISPLAY"]} --auto --pos ${disparray["PRIMARYPOSITION"]} --primary;
-    xrandr --output ${disparray["SECONDARYDISPLAY"]} --auto --pos ${disparray["SECONDARYPOSITION"]}
+    xrandr --output ${disparray["PRIMARYDISPLAY"]} --size ${disparray["PRIMARYRESOLUTION"]}  --pos ${disparray["PRIMARYPOSITION"]} --primary;
+    xrandr --output ${disparray["SECONDARYDISPLAY"]} --size ${disparray["SECONDARYRESOLUTION"]} --pos ${disparray["SECONDARYPOSITION"]}
     printf "Reset completed normally, primary option found \n"
     exit 0
   elif [[ ${disparray["PRIMARYOPTION"]} = "" ]]
   then
-    xrandr --output ${disparray["PRIMARYDISPLAY"]} --auto --pos ${disparray["PRIMARYPOSITION"]};
-    xrandr --output ${disparray["SECONDARYDISPLAY"]} --auto --pos ${disparray["SECONDARYPOSITION"]}
+    xrandr --output ${disparray["PRIMARYDISPLAY"]} --size ${disparray["PRIMARYRESOLUTION"]} --pos ${disparray["PRIMARYPOSITION"]};
+    xrandr --output ${disparray["SECONDARYDISPLAY"]} --size ${disparray["SECONDARYRESOLUTION"]} --pos ${disparray["SECONDARYPOSITION"]}
     printf "Reset completed normally, no primary option \n"
     exit 0
   fi
