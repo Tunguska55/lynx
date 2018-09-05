@@ -85,10 +85,7 @@ fi
 #array to store values read from conf file
 declare -A disparray
 
-#read the conf file and store value in array
 IFS="="
-
-
 if [[ $flag = "custom" ]] && [[ -e $configFile ]]
 then
   printf "Resetting display based on config file (${configFile}) \n"
@@ -112,8 +109,9 @@ then
   done < $configFile
 elif [[ -e $nvConf ]] && [[ ! $flag = "custom" ]]
 then
-
-
+  printf "Resetting display based on config file (${nvConf}) \n"
+  #unfortunately I can't find the primary monitor flag in the xorg conf file
+  #so this will be a broken feature for now 
 else
   printf "Unable to find config file, please run reset_display generate to create one \n"
   printf "If you want to use the xorg.conf, please run reset_display with no flags \n"
@@ -124,8 +122,8 @@ fi
 if [[ -e $configFile ]] && [[ ! -z $disparray["PRIMARYDISPLAY"] ]]
 then
   #printf "successfully executing \n" #debugging line
-  xrandr --output ${disparray["PRIMARYDISPLAY"]} --auto --pos ${disparray["PRIMARYPOSITION"]} --primary \
-  --output ${disparray["SECONDARYDISPLAY"]} --auto --pos ${disparray["SECONDARYPOSITION"]}
+  xrandr --output ${disparray["PRIMARYDISPLAY"]} --auto --pos ${disparray["PRIMARYPOSITION"]} --primary;
+  xrandr --output ${disparray["SECONDARYDISPLAY"]} --auto --pos ${disparray["SECONDARYPOSITION"]}
 
   printf "reset completed normally \n"
 fi
