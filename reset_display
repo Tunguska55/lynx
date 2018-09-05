@@ -1,19 +1,49 @@
 #!/usr/bin/env bash
 
+#Instead of using a custom generated config file, I will try to pull from /etc/xorg.config
+#to add a higher level of scalability
+
 ######current potential flags
 # remove-config -> removes current config
 # generate -> creates new config file based on display
 # -h / --h / -help / --help -> show current commands
 
+bold=$(tput bold)
+normal=$(tput sgr0)
 configFile="/u/$USER/.config/reset_display.conf"
+nvConf="/etc/xorg.conf"
 flag=$1 #capture the flag into a script variable rather than leaving as special
 
 if [[ $flag = "-h" || $flag = "--h" || $flag = "-help" || $flag = "--help" ]]
 then
-  printf "This script is designed to reset the displays after monitor shutting off or sleeping \n"
-  printf "When run by itself, the script will reset the displays based on a config file located in ${configFile} \n"
-  printf "reset_display remove-config -> will remove the config only \n"
-  printf "reset_display generate -> will only generate the config, should be ran when the monitors are set the way the should be \n"
+cat <<EOF
+
+  usage: reset_display [option]
+
+  ${bold}generate${normal}       : generates custom config
+  ${bold}remove-config${normal}   : removes custom config
+  ${bold}custom${normal}         : reset display using the custom config file located $configFile
+
+
+  Description:
+  This script is designed to reset the displays after a monitor shuts off or sleeps
+  When run by itself, the script will reset the displays based on the save Nvidia xorg.conf config file located in /etc/
+  However, it can be overridden with a custom generate config file located in: $configFile
+
+  If you want to read off of /etc/xorg.conf file:
+  reset_display
+
+  If you want to generate a custom config to place in ${bold}$configFile${normal}:
+  reset_display generate
+  ${bold}(NOTE: Make sure the displays are set the way you want first, before doing this or you will record incorrect parameters)${normal}
+
+  If you want to remove the custom config:
+  reset_display remove-config
+
+  If you want to use the custom config instead of /etc/xorg.conf:
+  reset_dusplay custom
+
+EOF
   exit 2
 fi
 
@@ -22,8 +52,8 @@ fi
 if [[ $flag = "remove-config" ]]
 then
   rm -f ${configFile}
-  printf "config file removed successfully \n"
-  printf "exiting script \n"
+  printf "Config file removed successfully \n"
+  printf "Exiting script \n"
   exit 2
 fi
 
@@ -53,7 +83,7 @@ fi
 #this is a quick catch to prevent the script from erroring out with being unable to find a file
 if [[ ! -e $configFile ]]
 then
-  printf "unable to find config file, please run generate with reset_display to create one \n"
+  printf "unable to find config file, please run reset_display generate to create one \n"
   exit 5
 fi
 
