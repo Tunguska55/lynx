@@ -32,7 +32,7 @@ cat <<EOF
 
   ${bold}generate${normal}                : generates custom config
   ${bold}remove-config${normal}          : removes custom config
-  ${bold}custom$ - broken{normal}         : reset display using the xorg config file located $nvConf
+  ${bold}custom$ - broken${normal}         : reset display using the xorg config file located $nvConf
 
   If running remotely, run the command:
   ${bold}setenv DISPLAY :0${normal} before running the script
