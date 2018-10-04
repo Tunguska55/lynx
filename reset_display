@@ -41,7 +41,7 @@ cat <<EOF
   This script is designed to reset the displays after a monitor shuts off or sleeps
   When run by itself, the script will reset the displays based on the self-generated configuration file
 
-  If you want to read off of /etc/xorg.conf file:
+  Primary use (pulls from configuration file):
   reset_display
 
   If you want to generate a custom config to place in ${bold}$configFile${normal}:
@@ -53,6 +53,11 @@ cat <<EOF
 
   If you want to use the nvidia config (feature currently broken):
   reset_dusplay custom
+
+  How to use: 
+  1) Change settings in nvidia-settings, save xorg.conf
+  2) Run ${bold}reset_display generate${normal} to create the custom configuration file
+  3) Whenever the screen mirrors, run ${bold}reset_display${normal} in terminal
 
 EOF
   exit 2
