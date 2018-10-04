@@ -30,17 +30,16 @@ cat <<EOF
 
   usage: reset_display [option]
 
-  ${bold}generate${normal}                : generates custom config
-  ${bold}remove-config${normal}          : removes custom config
-  ${bold}custom$ - broken${normal}         : reset display using the xorg config file located $nvConf
+  ${bold}generate${normal}                 : generates custom config
+  ${bold}remove-config${normal}            : removes custom config
+  ${bold}custom - broken${normal}          : reset display using the xorg config file located $nvConf
 
   If running remotely, run the command:
   ${bold}setenv DISPLAY :0${normal} before running the script
 
   Description:
   This script is designed to reset the displays after a monitor shuts off or sleeps
-  When run by itself, the script will reset the displays based on the save Nvidia xorg.conf config file located in /etc/
-  However, it can be overridden with a custom generate config file located in: $configFile
+  When run by itself, the script will reset the displays based on the self-generated configuration file
 
   If you want to read off of /etc/xorg.conf file:
   reset_display
@@ -52,7 +51,7 @@ cat <<EOF
   If you want to remove the custom config:
   reset_display remove-config
 
-  If you want to use the custom nvidia config (feature currently broken):
+  If you want to use the nvidia config (feature currently broken):
   reset_dusplay custom
 
 EOF
@@ -184,7 +183,7 @@ then
     printf "Reset completed normally, no primary option \n"
     exit 0
   fi
-elif [[ ! -e $configFile ]] && [[ -z $disparray["PRIMARYDISPLAY"] ]] || [[ $success = 0 ]]
+elif [[ ! -e $configFile ]] && [[ -z $disparray["PRIMARYDISPLAY"] ]] && [[ $flag = "" ]] || [[ $success = 0 ]] && [[ $flag = "" ]]
 then
   printf "Error during reset \n"
   printf "Check to see if config file exists in ${bold}$configFile${normal} \n"
